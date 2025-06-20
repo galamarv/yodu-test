@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	_ "modernc.org/sqlite"
 )
 
 func Test_problem1(t *testing.T) {
@@ -115,4 +117,17 @@ func TestProblem2(t *testing.T) {
 			}
 		}
 	})
+}
+
+func Test_problem3(t *testing.T) {
+	expected := "Budi|Elektronik|5|21500\nSari|Alat Tulis|10|10000\n"
+
+	actual, err := problem3()
+	if err != nil {
+		t.Fatalf("problem3() mengembalikan error: %v", err)
+	}
+
+	if actual != expected {
+		t.Errorf("Test 'Problem 3' gagal:\nEkspektasi:\n%q\n\tapi yang didapatkan:\n%q", expected, actual)
+	}
 }
