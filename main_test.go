@@ -2,9 +2,12 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/benweissmann/memongo"
 	_ "modernc.org/sqlite"
 )
 
@@ -129,5 +132,46 @@ func Test_problem3(t *testing.T) {
 
 	if actual != expected {
 		t.Errorf("Test 'Problem 3' gagal:\nEkspektasi:\n%q\n\tapi yang didapatkan:\n%q", expected, actual)
+	}
+}
+
+func Test_problem4(t *testing.T) {
+	// Start an in-memory MongoDB server for this test.
+	mongoServer, err := memongo.Start("4.4.1")
+	if err != nil {
+		t.Fatalf("Failed to start memongo server: %v", err)
+	}
+	defer mongoServer.Stop()
+
+	expectedResult := []ElasticsearchDoc{
+		{
+			ProductName:  "keyboard",
+			CustomerName: "Budi",
+			Category:     "Elektronik",
+			TotalQty:     120,
+			TotalRevenue: 60000,
+		},
+		{
+			ProductName:  "mouse",
+			CustomerName: "Budi",
+			Category:     "Elektronik",
+			TotalQty:     110,
+			TotalRevenue: 11000,
+		},
+	}
+
+	actualJSON, err := problem4(mongoServer.URI())
+	if err != nil {
+		t.Fatalf("problem4() returned an error: %v", err)
+	}
+
+	var actualResult []ElasticsearchDoc
+	if err := json.Unmarshal([]byte(actualJSON), &actualResult); err != nil {
+		t.Fatalf("Failed to unmarshal actual JSON: %v\nJSON was:\n%s", err, actualJSON)
+	}
+
+	if !reflect.DeepEqual(actualResult, expectedResult) {
+		expectedJSON, _ := json.MarshalIndent(expectedResult, "", "  ")
+		t.Errorf("Test 'Problem 4' failed:\nExpected:\n%s\n\nGot:\n%s", string(expectedJSON), actualJSON)
 	}
 }
